@@ -10,6 +10,12 @@ from portage.const import MAKE_CONF_FILE, USER_CONFIG_PATH
 
 from flaggie.makeconf import MakeConf
 
+def add(instmask, args):
+	print args
+
+def remove(instmask, args):
+	print args
+
 def main(argv):
 	parser = OptionParser()
 	parser.add_option('-a', '--add',
@@ -37,3 +43,12 @@ def main(argv):
 		(os.path.join(confroot, MAKE_CONF_FILE),
 			os.path.join(usercpath, 'make.conf')),
 		porttree)
+
+	# XXX: NewVariable, blah, blah
+	installmask = mkconf.variables['INSTALL_MASK']
+	if opts.add:
+		add(installmask, args)
+	elif opts.remove:
+		remove(installmask, args)
+
+	mkconf.write()
