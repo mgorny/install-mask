@@ -23,7 +23,9 @@ def add(instmask, args):
 				raise AssertionError('Unreachable block of code reached')
 
 def remove(instmask, args):
-	print args
+	for t in instmask:
+		for a in args:
+			del t[a]
 
 def main(argv):
 	parser = OptionParser()
