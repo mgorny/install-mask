@@ -27,20 +27,38 @@ def remove(instmask, args):
 		for a in args:
 			del t[a]
 
+def info(instmask, args):
+	# XXX: handle args, more details
+	print('Paths currently in INSTALL_MASK:')
+
+	foundone = False
+	for t in instmask:
+		for d in t:
+			print('* %s' % d.toString())
+			foundone = True
+
+	if not foundone:
+		print('(none)')
+
 def main(argv):
 	parser = OptionParser()
 	parser.add_option('-a', '--add',
-			dest='add', action='store_true',
+			dest='add', action='store_true', default=False,
 			help='Add paths to INSTALL_MASK')
 	parser.add_option('-d', '--delete', '--remove',
-			dest='remove', action='store_true',
+			dest='remove', action='store_true', default=False,
 			help='Remove paths from INSTALL_MASK')
+	parser.add_option('-i', '--info',
+			dest='info', action='store_true', default=False,
+			help='Print information about INSTALL_MASK')
 	(opts, args) = parser.parse_args(argv[1:])
-	if opts.add and opts.remove:
-		parser.error('Options --add and --remove are mutually exclusive.')
-	elif not opts.add and not opts.remove:
-		parser.error('No action specified (--add or --remove).')
-	if not args:
+
+	acts = opts.add + opts.remove + opts.info
+	if acts > 1:
+		parser.error('Actions (-a, -d, -i) are mutually exclusive.')
+	elif acts < 1:
+		parser.error('No action specified (-a, -d, -i).')
+	if not args and not opts.info:
 		parser.error('No paths specified')
 
 	trees = create_trees(
@@ -61,5 +79,7 @@ def main(argv):
 		add(installmask, args)
 	elif opts.remove:
 		remove(installmask, args)
+	elif opts.info:
+		info(installmask, args)
 
 	mkconf.write()
