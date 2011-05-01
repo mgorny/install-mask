@@ -11,7 +11,16 @@ from portage.const import MAKE_CONF_FILE, USER_CONFIG_PATH
 from flaggie.makeconf import MakeConf
 
 def add(instmask, args):
-	print args
+	for a in args:
+		for t in instmask:
+			if a in t:
+				break
+		else:
+			for t in instmask:
+				t.append(a)
+				break
+			else:
+				raise AssertionError('Unreachable block of code reached')
 
 def remove(instmask, args):
 	print args
