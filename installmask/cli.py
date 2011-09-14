@@ -13,7 +13,7 @@ from flaggie.makeconf import MakeConf
 def add(instmask, args):
 	for a in args:
 		for t in instmask:
-			if a in t:
+			if a in [fl.toString() for fl in t]:
 				break
 		else:
 			for t in instmask:
