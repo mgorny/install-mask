@@ -9,7 +9,7 @@ import os.path, sys
 
 sys.path.insert(0, os.path.dirname(__file__))
 try:
-	from InstallMask import PV
+	from installmask import PV
 except ImportError:
 	PV = 'unknown'
 
@@ -20,7 +20,7 @@ setup(
 		author_email = 'mgorny@gentoo.org',
 		url = 'http://github.com/mgorny/install-mask',
 
-		packages = ['InstallMask'],
+		packages = ['installmask'],
 		scripts = ['install-mask'],
 
 		classifiers = [

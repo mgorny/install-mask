@@ -7,20 +7,20 @@
 import sys
 
 try:
-	from InstallMask.cli import main
+	from installmask.cli import main
 except ImportError:
 	import os.path
 	sys.path.insert(0, os.path.dirname(__file__))
 	# Ensure a clean reload from the new location.
-	if 'InstallMask' in sys.modules:
+	if 'installmask' in sys.modules:
 		try: # py3 compat
 			from imp import reload
 		except ImportError:
 			pass
 
-		reload(sys.modules['InstallMask'])
-		del sys.modules['InstallMask']
-	from InstallMask.cli import main
+		reload(sys.modules['installmask'])
+		del sys.modules['installmask']
+	from installmask.cli import main
 
 if __name__ == '__main__':
 	sys.exit(main(sys.argv))
