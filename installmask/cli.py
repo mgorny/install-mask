@@ -3,15 +3,25 @@
 # Released under the terms of the 3-clause BSD license.
 
 from optparse import OptionParser
-import os
+import os, os.path
 
 from portage import create_trees
 from portage.const import MAKE_CONF_FILE, USER_CONFIG_PATH
 
 from flaggie.makeconf import MakeConf
 
-def add(instmask, args):
+from .locationdb import LocationDB
+
+def expand_ldb(args, ldb):
 	for a in args:
+		if os.path.isabs(a):
+			yield a
+		else:
+			for exp in ldb[a].paths:
+				yield exp
+
+def add(instmask, args, ldb):
+	for a in expand_ldb(args, ldb):
 		for t in instmask:
 			if a in [fl.toString() for fl in t]:
 				break
@@ -22,12 +32,13 @@ def add(instmask, args):
 			else:
 				raise AssertionError('Unreachable block of code reached')
 
-def remove(instmask, args):
+def remove(instmask, args, ldb):
+	args = tuple(expand_ldb(args, ldb))
 	for t in instmask:
 		for a in args:
 			del t[a]
 
-def info(instmask, args):
+def info(instmask, args, ldb):
 	# XXX: handle args, more details
 	print('Paths currently in INSTALL_MASK:')
 
@@ -73,13 +84,15 @@ def main(argv):
 			os.path.join(usercpath, 'make.conf')),
 		porttree)
 
+	ldb = LocationDB('test.xml')
+
 	# XXX: NewVariable, blah, blah
 	installmask = mkconf.variables['INSTALL_MASK']
 	if opts.add:
-		add(installmask, args)
+		add(installmask, args, ldb = ldb)
 	elif opts.remove:
-		remove(installmask, args)
+		remove(installmask, args, ldb = ldb)
 	elif opts.info:
-		info(installmask, args)
+		info(installmask, args, ldb = ldb)
 
 	mkconf.write()

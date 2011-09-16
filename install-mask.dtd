@@ -1,0 +1,6 @@
+<!ELEMENT install-mask (location*)>
+<!ELEMENT location (path+, description?)>
+<!ELEMENT path (#PCDATA)>
+<!ELEMENT description (#PCDATA)>
+
+<!ATTLIST location id ID #REQUIRED>
