@@ -40,15 +40,25 @@ def remove(instmask, args, ldb):
 
 def info(instmask, args, ldb):
 	# XXX: handle args, more details
-	print('Paths currently in INSTALL_MASK:')
+	if not args:
+		print('Paths currently in INSTALL_MASK:')
+	else:
+		paths = set()
 
 	foundone = False
 	for t in instmask:
 		for d in t:
-			print('* %s' % d.toString())
+			if not args:
+				print('* %s' % d.toString())
+			else:
+				paths.add(d.toString())
 			foundone = True
 
-	if not foundone:
+	if args:
+		for a in expand_ldb(args, ldb):
+			print('* %s (%s)' % (a,
+				'enabled' if a in paths else 'disabled'))
+	elif not foundone:
 		print('(none)')
 
 def main(argv):
@@ -61,7 +71,7 @@ def main(argv):
 			help='Remove paths from INSTALL_MASK')
 	parser.add_option('-i', '--info',
 			dest='info', action='store_true', default=False,
-			help='Print information about INSTALL_MASK')
+			help='Print information about INSTALL_MASK flag or INSTALL_MASK in general')
 	(opts, args) = parser.parse_args(argv[1:])
 
 	acts = opts.add + opts.remove + opts.info
