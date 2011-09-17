@@ -112,11 +112,14 @@ def main(argv):
 
 	# XXX: NewVariable, blah, blah
 	installmask = mkconf.variables['INSTALL_MASK']
-	if opts.add:
-		add(installmask, args, ldb = ldb)
-	elif opts.remove:
-		remove(installmask, args, ldb = ldb)
-	elif opts.info:
-		info(installmask, args, ldb = ldb)
+	try:
+		if opts.add:
+			add(installmask, args, ldb = ldb)
+		elif opts.remove:
+			remove(installmask, args, ldb = ldb)
+		elif opts.info:
+			info(installmask, args, ldb = ldb)
+	except Exception as e:
+		parser.error(str(e))
 
 	mkconf.write()

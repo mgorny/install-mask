@@ -24,7 +24,7 @@ class LocationDB(object):
 				except AttributeError:
 					d = None
 				return Location(tuple(l.path), d)
-		raise KeyError('%s not found in LocationDB' % key)
+		raise KeyError('%s is an invalid location' % key)
 
 ldb_schema = '''
 
