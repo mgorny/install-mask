@@ -55,9 +55,23 @@ def info(instmask, args, ldb):
 			foundone = True
 
 	if args:
-		for a in expand_ldb(args, ldb):
-			print('* %s (%s)' % (a,
-				'enabled' if a in paths else 'disabled'))
+		for a in args:
+			if os.path.isabs(a):
+				exp = (a,)
+			else:
+				try:
+					e = ldb[a]
+				except KeyError:
+					print('* %s (invalid)' % a)
+					exp = ()
+				else:
+					print('# %s [%s]' % (a,
+						e.description or '(no description)'))
+					exp = e.paths
+
+			for aa in exp:
+				print('* %s (%s)' % (aa,
+					'enabled' if aa in paths else 'disabled'))
 	elif not foundone:
 		print('(none)')
 
