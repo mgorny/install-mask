@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE install-mask SYSTEM "install-mask.dtd">
 <install-mask>
 	<location id="systemd">
 		<path>/lib/systemd/system</path>
