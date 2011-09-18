@@ -8,7 +8,7 @@ import os, os.path
 from portage import create_trees
 from portage.const import MAKE_CONF_FILE, USER_CONFIG_PATH
 
-from flaggie.makeconf import MakeConf
+from flaggie.makeconf import MakeConf, NewVariable
 
 from .locationdb import LocationDB
 
@@ -110,7 +110,12 @@ def main(argv):
 	ldb = LocationDB('test.xml')
 
 	# XXX: NewVariable, blah, blah
-	installmask = mkconf.variables['INSTALL_MASK']
+	try:
+		installmask = mkconf.variables['INSTALL_MASK']
+	except KeyError:
+		installmask = NewVariable('INSTALL_MASK')
+		mkconf.newvars.append(installmask)
+
 	try:
 		if opts.add:
 			add(installmask, args, ldb = ldb)
