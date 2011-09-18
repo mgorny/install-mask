@@ -10,13 +10,19 @@ Location = namedtuple('Location', ('paths', 'description'))
 
 class LocationDB(object):
 	def __init__(self, path):
-		# XXX: make this lazy
-		schema = lxml.etree.XMLSchema(lxml.etree.XML(ldb_schema))
-		p = lxml.objectify.makeparser(schema = schema)
-		t = lxml.objectify.parse(path, p)
-		self._root = t.getroot()
+		self._path = path
+		self._loaded = False
+
+	def _load_db(self):
+		if not self._loaded:
+			schema = lxml.etree.XMLSchema(lxml.etree.XML(ldb_schema))
+			p = lxml.objectify.makeparser(schema = schema)
+			t = lxml.objectify.parse(self._path, p)
+			self._root = t.getroot()
+			self._loaded = True
 
 	def __getitem__(self, key):
+		self._load_db()
 		for l in self._root.location:
 			if l.get('id') == key:
 				try:
