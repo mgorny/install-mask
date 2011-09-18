@@ -6,7 +6,6 @@ from optparse import OptionParser
 import os, os.path
 
 from portage import create_trees
-from portage.const import MAKE_CONF_FILE, USER_CONFIG_PATH
 
 from flaggie.makeconf import MakeConf, NewVariable
 
@@ -100,16 +99,14 @@ def main(argv):
 			target_root = os.environ.get('ROOT'))
 	porttree = trees[max(trees)]['porttree'].dbapi
 
-	confroot = porttree.settings['PORTAGE_CONFIGROOT']
-	usercpath = os.path.join(confroot, USER_CONFIG_PATH)
+	confroot = os.environ.get('PORTAGE_CONFIGROOT', '/')
 	mkconf = MakeConf(
-		(os.path.join(confroot, MAKE_CONF_FILE),
-			os.path.join(usercpath, 'make.conf')),
+		(os.path.join(confroot, 'etc', 'make.conf'),
+			os.path.join(confroot, 'etc', 'portage', 'make.conf')),
 		porttree)
 
 	ldb = LocationDB('test.xml')
 
-	# XXX: NewVariable, blah, blah
 	try:
 		installmask = mkconf.variables['INSTALL_MASK']
 	except KeyError:
