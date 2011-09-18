@@ -39,7 +39,6 @@ def remove(instmask, args, ldb):
 			del t[a]
 
 def info(instmask, args, ldb):
-	# XXX: handle args, more details
 	if not args:
 		print('Paths currently in INSTALL_MASK:')
 	else:
