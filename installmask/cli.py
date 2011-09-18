@@ -105,7 +105,15 @@ def main(argv):
 			os.path.join(confroot, 'etc', 'portage', 'make.conf')),
 		porttree)
 
-	ldb = LocationDB('test.xml')
+	# .cp_list() should be potentially faster than .match()
+	for m in reversed(porttree.cp_list('app-portage/install-mask')):
+		d = os.path.dirname(porttree.findname(m))
+		dbf = os.path.join(d, 'files', 'location-db.xml')
+		if os.path.exists(dbf):
+			break
+	else:
+		dbf = None
+	ldb = LocationDB(dbf)
 
 	try:
 		installmask = mkconf.variables['INSTALL_MASK']

@@ -15,6 +15,9 @@ class LocationDB(object):
 
 	def _load_db(self):
 		if not self._loaded:
+			if self._path is None:
+				raise SystemError('location-db.xml not found in any FILESDIR!')
+
 			schema = lxml.etree.XMLSchema(lxml.etree.XML(ldb_schema))
 			p = lxml.objectify.makeparser(schema = schema)
 			t = lxml.objectify.parse(self._path, p)
