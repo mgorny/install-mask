@@ -17,7 +17,7 @@ def expand_ldb(args, ldb):
 			yield a
 		else:
 			for exp in ldb[a].paths:
-				yield exp
+				yield exp.pyval
 
 def add(instmask, args, ldb):
 	for a in expand_ldb(args, ldb):
@@ -93,7 +93,7 @@ def rebuild(instmask, args, ldb, dbapi):
 
 	enabled = _get_enabled(instmask)
 	if args:
-		paths = frozenset(expand_ldb(args))
+		paths = frozenset(expand_ldb(args, ldb))
 	else:
 		paths = enabled
 
