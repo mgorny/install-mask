@@ -3,7 +3,7 @@
 # Released under the terms of the 2-clause BSD license.
 
 from optparse import OptionParser
-import os, os.path
+import os, os.path, sys
 
 from portage import create_trees
 
@@ -73,6 +73,48 @@ def info(instmask, args, ldb):
 	elif not foundone:
 		print('(none)')
 
+def rebuild(instmask, args, ldb, dbapi):
+	def _get_enabled(instmask):
+		ret = set()
+		for t in instmask:
+			for d in t:
+				ret.add(d.toString())
+		return frozenset(ret)
+
+	def _output_status(cur, length):
+		sys.stderr.write('\rScanning packages: %4d of %4d...' % (cur, length))
+
+	def _match_path(vpath, args, enabled):
+		for p in args:
+			if vpath.startswith(p):
+				if bool(os.path.exists(vpath)) == bool(p in enabled):
+					return True
+		return False
+
+	enabled = _get_enabled(instmask)
+	if args:
+		paths = frozenset(expand_ldb(args))
+	else:
+		paths = enabled
+
+	cpvs = dbapi.cpv_all()
+	cpvl = len(cpvs)
+	rebuilds = set()
+	for i, cpv in enumerate(cpvs):
+		_output_status(i, cpvl)
+		dblink = dbapi._dblink(cpv)
+
+		for f in dblink.getcontents():
+			if _match_path(f, paths, enabled):
+				rebuilds.add(cpv)
+				break
+
+	_output_status(cpvl, cpvl)
+	sys.stderr.write(' done.\n')
+
+	for r in rebuilds:
+		print('=%s' % r)
+
 def main(argv):
 	parser = OptionParser()
 	parser.add_option('-a', '--add',
@@ -84,20 +126,24 @@ def main(argv):
 	parser.add_option('-i', '--info',
 			dest='info', action='store_true', default=False,
 			help='Print information about INSTALL_MASK flag or INSTALL_MASK in general')
+	parser.add_option('-r', '--rebuild',
+			dest='rebuild', action='store_true', default=False,
+			help='Create rebuild list for packages not matching given (or current) INSTALL_MASK')
 	(opts, args) = parser.parse_args(argv[1:])
 
-	acts = opts.add + opts.remove + opts.info
+	acts = opts.add + opts.remove + opts.info + opts.rebuild
 	if acts > 1:
-		parser.error('Actions (-a, -d, -i) are mutually exclusive.')
+		parser.error('Actions (-a, -d, -i, -r) are mutually exclusive.')
 	elif acts < 1:
-		parser.error('No action specified (-a, -d, -i).')
-	if not args and not opts.info:
+		parser.error('No action specified (-a, -d, -i, -r).')
+	if not args and not opts.info + opts.rebuild:
 		parser.error('No paths specified')
 
 	trees = create_trees(
 			config_root = os.environ.get('PORTAGE_CONFIGROOT'),
 			target_root = os.environ.get('ROOT'))
 	porttree = trees[max(trees)]['porttree'].dbapi
+	vartree = trees[max(trees)]['vartree'].dbapi
 
 	confroot = os.environ.get('PORTAGE_CONFIGROOT', '/')
 	mkconf = MakeConf(
@@ -128,6 +174,8 @@ def main(argv):
 			remove(installmask, args, ldb = ldb)
 		elif opts.info:
 			info(installmask, args, ldb = ldb)
+		elif opts.rebuild:
+			rebuild(installmask, args, ldb = ldb, dbapi = vartree)
 	except Exception as e:
 		parser.error(str(e))
 
