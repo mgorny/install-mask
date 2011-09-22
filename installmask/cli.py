@@ -6,6 +6,7 @@ from optparse import OptionParser
 import os, os.path, sys
 
 from portage import create_trees
+from portage.versions import cpv_getkey
 
 from flaggie.makeconf import MakeConf, NewVariable
 
@@ -106,14 +107,16 @@ def rebuild(instmask, args, ldb, dbapi):
 
 		for f in dblink.getcontents():
 			if _match_path(f, paths, enabled):
-				rebuilds.add(cpv)
+				key = cpv_getkey(cpv)
+				slot = dbapi.aux_get(cpv, ('SLOT',))[0]
+				rebuilds.add('%s:%s' % (key, slot))
 				break
 
 	_output_status(cpvl, cpvl)
 	sys.stderr.write(' done.\n')
 
 	for r in rebuilds:
-		print('=%s' % r)
+		print(r)
 
 def main(argv):
 	parser = OptionParser()
