@@ -18,9 +18,9 @@ class LocationDB(object):
 			if self._path is None:
 				raise SystemError('location-db.xml not found in any FILESDIR!')
 
-			schema = lxml.etree.XMLSchema(lxml.etree.XML(ldb_schema))
-			p = lxml.objectify.makeparser(schema = schema)
-			t = lxml.objectify.parse(self._path, p)
+			schema = lxml.etree.RelaxNG(lxml.etree.XML(ldb_schema))
+			t = lxml.objectify.parse(self._path)
+			schema.assertValid(t)
 			self._root = t.getroot()
 			self._loaded = True
 
@@ -37,23 +37,21 @@ class LocationDB(object):
 
 ldb_schema = '''
 
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
-	<xs:element name="install-mask">
-		<xs:complexType>
-			<xs:sequence>
-				<xs:element name="location" minOccurs="0" maxOccurs="unbounded">
-					<xs:complexType>
-						<xs:sequence>
-							<xs:element name="path" type="xs:string" maxOccurs="unbounded"/>
-							<xs:element name="description" type="xs:token" minOccurs="0"/>
-						</xs:sequence>
+<element name="install-mask" xmlns="http://relaxng.org/ns/structure/1.0">
+	<zeroOrMore>
+		<element name="location">
+			<interleave>
+				<oneOrMore>
+					<element name="path"><text/></element>
+				</oneOrMore>
+				<optional>
+					<element name="description"><text/></element>
+				</optional>
+			</interleave>
 
-						<xs:attribute name="id" type="xs:string" use="required"/>
-					</xs:complexType>
-				</xs:element>
-			</xs:sequence>
-		</xs:complexType>
-	</xs:element>
-</xs:schema>
+			<attribute name="id"><text/></attribute>
+		</element>
+	</zeroOrMore>
+</element>
 
 '''
