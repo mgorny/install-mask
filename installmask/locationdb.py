@@ -37,7 +37,8 @@ class LocationDB(object):
 
 ldb_schema = '''
 
-<element name="install-mask" xmlns="http://relaxng.org/ns/structure/1.0">
+<element name="install-mask" xmlns="http://relaxng.org/ns/structure/1.0"
+		datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
 	<zeroOrMore>
 		<element name="location">
 			<interleave>
@@ -45,11 +46,11 @@ ldb_schema = '''
 					<element name="path"><text/></element>
 				</oneOrMore>
 				<optional>
-					<element name="description"><text/></element>
+					<element name="description"><data type="token"/></element>
 				</optional>
 			</interleave>
 
-			<attribute name="id"><text/></attribute>
+			<attribute name="id"><data type="ID"/></attribute>
 		</element>
 	</zeroOrMore>
 </element>
