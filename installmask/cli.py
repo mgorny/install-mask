@@ -148,7 +148,7 @@ def main(argv):
 	porttree = trees[max(trees)]['porttree'].dbapi
 	vartree = trees[max(trees)]['vartree'].dbapi
 
-	confroot = os.environ.get('PORTAGE_CONFIGROOT', '/')
+	confroot = porttree.settings['PORTAGE_CONFIGROOT']
 	mkconf = MakeConf(
 		(os.path.join(confroot, 'etc', 'make.conf'),
 			os.path.join(confroot, 'etc', 'portage', 'make.conf')),
