@@ -87,7 +87,8 @@ def rebuild(instmask, args, ldb, dbapi):
 
 	def _match_path(vpath, args, enabled):
 		for p in args:
-			if vpath.startswith(p):
+			ps = p.rstrip(os.path.sep)
+			if vpath == ps or vpath.startswith(ps + os.path.sep):
 				if bool(os.path.exists(vpath)) == bool(p in enabled):
 					return True
 		return False
