@@ -3,8 +3,22 @@
 # Released under the terms of the 2-clause BSD license.
 
 from collections import namedtuple
+import io, shlex
 
-import lxml.objectify, lxml.etree
+try:
+	from configparser import NoOptionError
+
+	# 3.2+
+	if hasattr(configparser.ConfigParser, 'read_file'):
+		from configparser import ConfigParser
+	else:
+		from configparser import SafeConfigParser as ConfigParser
+		setattr(ConfigParser, 'read_file', ConfigParser.readfp)
+except ImportError:
+	from ConfigParser import NoOptionError
+	from ConfigParser import SafeConfigParser as ConfigParser
+	setattr(ConfigParser, 'read_file', ConfigParser.readfp)
+
 
 Location = namedtuple('Location', ('paths', 'description'))
 
@@ -16,43 +30,29 @@ class LocationDB(object):
 	def _load_db(self):
 		if not self._loaded:
 			if self._path is None:
-				raise SystemError('location-db.xml not found in any FILESDIR!')
+				raise SystemError('location-db.conf not found in any FILESDIR!')
 
-			schema = lxml.etree.RelaxNG(lxml.etree.XML(ldb_schema))
-			t = lxml.objectify.parse(self._path)
-			schema.assertValid(t)
-			self._root = t.getroot()
-			self._loaded = True
+			with io.open(self._path, encoding='utf-8') as f:
+				self._conf = ConfigParser()
+				self._conf.read_file(f)
+
+			try:
+				if self._conf.get('__install-mask__', 'version') != '1':
+					raise SystemError('Unsupported location-db.conf version')
+			except (KeyError, NoOptionError):
+				raise SystemError('Malformed location-db.conf')
 
 	def __getitem__(self, key):
 		self._load_db()
-		for l in self._root.location:
-			if l.get('id') == key:
-				try:
-					d = ' '.join(l.description.text.split())
-				except AttributeError:
-					d = None
-				return Location(tuple(l.path), d)
-		raise KeyError('%s is an invalid location' % key)
 
-ldb_schema = '''
+		try:
+			path = shlex.split(self._conf.get(key, 'path'))
+		except KeyError:
+			raise KeyError('%s is an invalid location' % key)
 
-<element name="install-mask" xmlns="http://relaxng.org/ns/structure/1.0"
-		datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
-	<zeroOrMore>
-		<element name="location">
-			<interleave>
-				<oneOrMore>
-					<element name="path"><text/></element>
-				</oneOrMore>
-				<optional>
-					<element name="description"><data type="token"/></element>
-				</optional>
-			</interleave>
+		try:
+			desc = self._conf.get(key, 'description')
+		except NoOptionError:
+			desc = None
 
-			<attribute name="id"><data type="ID"/></attribute>
-		</element>
-	</zeroOrMore>
-</element>
-
-'''
+		return Location(tuple(path), desc)
