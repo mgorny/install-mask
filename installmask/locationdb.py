@@ -6,13 +6,14 @@ from collections import namedtuple
 import io, shlex
 
 try:
-	from configparser import NoOptionError
+	import configparser
+	NoOptionError = configparser.NoOptionError
 
 	# 3.2+
 	if hasattr(configparser.ConfigParser, 'read_file'):
-		from configparser import ConfigParser
+		ConfigParser = configparser.ConfigParser
 	else:
-		from configparser import SafeConfigParser as ConfigParser
+		ConfigParser = configparser.SafeConfigParser
 		setattr(ConfigParser, 'read_file', ConfigParser.readfp)
 except ImportError:
 	from ConfigParser import NoOptionError
