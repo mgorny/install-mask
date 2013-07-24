@@ -18,7 +18,7 @@ setup(
 		version = PV,
 		author = 'Michał Górny',
 		author_email = 'mgorny@gentoo.org',
-		url = 'http://github.com/mgorny/install-mask',
+		url = 'https://bitbucket.org/mgorny/install-mask',
 
 		packages = ['installmask'],
 		scripts = ['install-mask'],
